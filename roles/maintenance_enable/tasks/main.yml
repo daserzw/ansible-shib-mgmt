@@ -1,0 +1,30 @@
+- name: Shutdown all IdP related services
+  service:
+    name: "{{ item }}"
+    state: stopped
+  with_items:
+    - jetty
+    - mysql
+    - slapd
+
+- name: Disable Apache2 idp.conf
+  shell: "mv /etc/apache2/conf-enabled/idp.conf /etc/apache2/conf-enabled/idp.conf.org"
+  notify:
+    - Restart Apache2
+    
+- name: Copy the Apache2 maintenance config file
+  template:
+    src: "templates/maintenance.conf.j2"
+    dest: "/etc/apache2/conf-available/maintenance.conf"
+    
+
+- name: Copy the Apache2 maintenance config file
+  copy:
+    src: "files/maintenance.html"
+    dest: "/var/www/html/maintenance.html"
+    
+- name: Enable the Apache2 maintenance config file
+  shell: "a2enconf maintenance"
+  notify:
+    - Restart Apache2
+
