@@ -1,4 +1,4 @@
-# MGMT Operations
+# Some ansible roles for Shibboleth MGMT Operations
 
 ## Basic Operations (ansible roles)
 
