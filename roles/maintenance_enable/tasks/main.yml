@@ -1,12 +1,24 @@
-- name: Shutdown all IdP related services
-  service:
-    name: "{{ item }}"
-    state: stopped
-  with_items:
-    - jetty
-    - mysql
-    - slapd
+- name: Look for ldap-backup script
+  stat:
+    path: /ect/cron.hourly/ldap-backup
+  register: ldapbackup
 
+- name: Shutdown Jetty
+  service:
+    name: jetty
+    state: stopped
+
+- name: Shutdown Mysql
+  service:
+    name: mysql
+    state: stopped
+
+- name: Shutdown Openldap
+  service:
+    name: slapd
+    state: stopped
+  when: ldapbackup.stat.exists is defined
+  
 - name: Disable Apache2 idp.conf
   shell: "mv /etc/apache2/conf-enabled/idp.conf /etc/apache2/conf-enabled/idp.conf.org"
   notify:
@@ -27,4 +39,3 @@
   shell: "a2enconf maintenance"
   notify:
     - Restart Apache2
-

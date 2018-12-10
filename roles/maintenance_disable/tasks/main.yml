@@ -1,11 +1,23 @@
-- name: Start all the IdP related services
+- name: Look for ldap-backup script
+  stat:
+    path: /ect/cron.hourly/ldap-backup
+  register: ldapbackup
+
+- name: Start Jetty
   service:
-    name: "{{ item }}"
+    name: jetty
     state: started
-  with_items:
-    - jetty
-    - mysql
-    - slapd
+
+- name: Start Mysql
+  service:
+    name: mysql
+    state: started
+
+- name: Started Openldap
+  service:
+    name: slapd
+    state: started
+  when: ldapbackup.stat.exists is defined
 
 - name: Enable the Apache2 idp.conf
   shell: "mv /etc/apache2/conf-enabled/idp.conf.org /etc/apache2/conf-enabled/idp.conf"
